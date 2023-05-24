@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@700&family=Poppins:wght@400;500;600&display=swap');
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 5px;
+        background: linear-gradient(
+          90deg,
+          rgb(199, 30, 3) 0%,
+          rgb(00, 00, 00) 100%
+        );
+      }
+
+      body h2 {
+        color: white;
+      }
+
+      main {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 500px;
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .content {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+      }
+
+      .quantidade {
+        text-align: end;
+      }
+
+      .respostas {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .chart {
+        width: 450px;
+        height: 300px;
+        border: 1px solid #ccc;
+        padding: 10px;
+      }
+      #chartCanvas {
+        height: 300px;
+        width: 100%;
+        display: flex;
+        gap: 30px;
+      }
+      button {
+        width: 100%;
+        text-align: start;
+        padding: 5px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #c71e03;
+        color: #000000;
+      }
+
+      #progresso {
+        width: 100%;
+        background-color: #000000;
+      }
+
+      #barra {
+        width: 20%;
+        height: 30px;
+        background-color: #c71e03;
+      }
+
+      .fim {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        width: 500px;
+      }
+
+      .btn-reset {
+        text-align: center;
+        width: 100px;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+
+    <title>Quiz-app</title>
+  </head>
+  <body>
+    <h2>QUIZ APP</h2>
+    <main>
+      <div class="content">
+        <span class="quantidade"></span>
+        <span class="perguntas"></span>
+        <span class="respostas"></span>
+        <div id="progresso">
+          <div id="barra"></div>
+        </div>
+      </div>
+      <div class="fim">
+        <div class="chart" id="chartContainer"></div>
+
+        <button class="btn-reset" onclick="resetar()">Reiniciar</button>
+      </div>
+
+      <script src="script3.js" type="module"></script>
+    </main>
+    <script>
+      const pergunta = document.querySelector('.perguntas')
+      const respostas = document.querySelector('.respostas')
+
+      const content = document.querySelector('.content')
+      const contentFinish = document.querySelector('.fim')
+      const btnReiniciar = document.querySelector('.fim button')
+      const progresso = document.getElementById('barra')
+      const ctx = document.getElementById('myChart')
+
+      let h_res = [[], [], []]
+      let grupo1 = 0
+      let grupo2 = 0
+      let grupo3 = 0
+      let grupo4 = 0
+      let grupo5 = 0
+      let score = 0
+
+      const perguntas = [
+        {
+          grupo: 1,
+          question: 'Você ama investir seu tempo em coisas novas',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 1,
+          question: 'Você consegue ensinar seus amigos com facilidade',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 1,
+          question: 'Você é uma pessoa que gosta de estudar e estar preparado',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 1,
+          question: 'Você ama cuidar das necessidades emocionais das pessoas',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 1,
+          question: 'Você consegue se conectar com pessoas novas',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 2,
+          question: 'Você é uma pessoa empreendedora',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 2,
+          question: 'Você consegue transmitir conhecimento facilmente',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 2,
+          question: 'Você prioriza sempre discernir a vontade de Deus',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 2,
+          question: 'Você está preocupado em cuidar e amar a todos',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 2,
+          question: 'Você é alguém que geralmente tem grande influência',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 3,
+          question: 'Você é quem toma a frente nos trabalhos em grupo',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 3,
+          question: 'Você dá sua opinião e sempre explica porque pensa assim',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 3,
+          question: 'Você procura fazer valer aquilo que foi combinado',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 3,
+          question: 'Você todos querem falar com você quando chega na escola',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 3,
+          question: 'Você anda no intervalo e conversa com qualquer pessoa',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 4,
+          question: 'Você tem característica de inovar nos trabalhos',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 4,
+          question: 'Você gosta de escrever, manter um diário ou ler bastante',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 4,
+          question: 'Você busca fazer as coisas da forma correta e sem atalhos',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 4,
+          question: 'Você deixa de entregar um trabalho para estar com amigos',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 4,
+          question: 'Você tem um carisma natural e as pessoas confiam em você',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 5,
+          question: 'Você é motivado por novidades e ideias novas',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 5,
+          question: 'Você auxilia nas aulas ensinando seu amigos',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 5,
+          question:
+            'Você observa a coerência das palavras e atitudes das pessoas',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 5,
+          question: 'Você numa festa gosta de conversar e fazer novas amizades',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        },
+        {
+          grupo: 5,
+          question: 'Você é alguém extrovertido que gosta de falar bastante',
+          answers: [
+            { option: 'Concordo Totalmente', points: 10 },
+            { option: 'COncordo Parcialmente', points: 7 },
+            { option: 'Discordo Parcialmente', points: 4 },
+            { option: 'Discordo Totalmente', points: 0 }
+          ]
+        }
+      ]
+
+      let perguntaAtual = 0
+      let questaoCorretas = 0
+
+      function loadQuestion() {
+        progresso.setAttribute('style', 'width:' + perguntaAtual * 4 + '%')
+
+        const item = perguntas[perguntaAtual]
+        respostas.innerHTML = ''
+        pergunta.innerHTML = item.question
+
+        h_res[0].push(item.question)
+
+        h_res[2].push(item.grupo)
+
+        for (let index = 0; index < h_res[2].length; index++) {
+          if (h_res[2][index] === 1) {
+            grupo1 += Number(h_res[1][index.value])
+            console.log(h_res)
+            console.log(Number(grupo1))
+          } else if (h_res[2][index] === 2) {
+            grupo2++
+          } else if (h_res[2][index] === 3) {
+            grupo3++
+          } else if (h_res[2][index] === 4) {
+            grupo4++
+          } else if (h_res[2][index] === 5) {
+            grupo5++
+          }
+        }
+        item.answers.forEach(resposta => {
+          const div = document.createElement('div')
+
+          div.innerHTML = `
+              <button data="${resposta.option}" class="resposta" data-points="${resposta.points}">
+              ${resposta.option}
+              </button>
+              `
+
+          respostas.appendChild(div)
+        })
+
+        document.querySelectorAll('.resposta').forEach(item => {
+          item.addEventListener('click', nextQuestion)
+        })
+      }
+
+      btnReiniciar.onclick = () => {
+        content.style.display = 'flex'
+        contentFinish.style.display = 'none'
+
+        perguntaAtual = 0
+        questaoCorretas = 0
+        localStorage.setItem('score', score)
+        return window.location.assign('inicial.html')
+      }
+
+      function nextQuestion(e) {
+        h_res[1].push(e.target.getAttribute('data-points'))
+        if (e.target.getAttribute('data-points')) {
+          localStorage.setItem('h_res', [h_res[1]])
+        }
+
+        if (perguntaAtual < perguntas.length - 1) {
+          perguntaAtual++
+          loadQuestion()
+        } else {
+          finish()
+        }
+      }
+
+      function finish() {
+        var data = {
+          labels: ['Apostolo', 'Profeta', 'Evangelista', 'Pastor', 'Mestre'],
+          values: [[grupo1], [grupo2], [grupo3], [grupo4], [grupo5]]
+        }
+        function createChart(data) {
+          var chartCanvas = document.createElement('canvas')
+          chartCanvas.width = 500
+          chartCanvas.height = 300
+          chartCanvas.id = 'chartCanvas'
+
+          var chartContainer = document.getElementById('chartContainer')
+          chartContainer.appendChild(chartCanvas)
+          var ctx = chartCanvas.getContext('2d')
+          var barWidth = 75
+          var spacing = 30
+          var startX = 5
+          var startY = 280
+
+          for (var i = 0; i < data.labels.length; i++) {
+            var value = data.values[i]
+            var barHeight = data.values[i]
+
+            ctx.fillStyle = 'rgba(75, 192, 192, 0.5)'
+            ctx.fillRect(startX, startY - barHeight, barWidth, barHeight)
+
+            ctx.fillStyle = '#000'
+            ctx.fillText(
+              value,
+              startX + barWidth / 2 - 5,
+              startY - barHeight - 10
+            )
+
+            ctx.fillText(data.labels[i], startX, startY + 20)
+
+            startX += barWidth + spacing
+          }
+        }
+        createChart(data)
+
+        content.style.display = 'none'
+        contentFinish.style.display = 'flex'
+        contentFinish.style.alignitems = 'center'
+      }
+
+      loadQuestion()
+    </script>
+  </body>
+</html>
